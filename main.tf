@@ -1,21 +1,35 @@
 provider "aws" {
     region = "us-east-1"
-  
+
 }
 
 
-resource "aws_instance" "ambiente-dev   " {
+resource "aws_instance" "ambiente-ansible" {
 
   instance_type = "t2.micro"
   ami = "ami-052efd3df9dad4825"
   key_name = "linuxtips"
-  vpc_security_group_ids = [ "sg-017faccb1e8bbdd01" ]
-
+  vpc_security_group_ids = [aws_security_group.acesso_ssh_http.id ]
+  associate_public_ip_address = true
+  
   tags = {
-    Name = "srv-dev-01"
+    Name = "srv-ansible"
   }
 
+  provisioner "remote-exec" {
 
+    connection {
+      host = aws_instance.ambiente-ansible.public_dns
+      type = "ssh"
+      user = "ubuntu"
+  
+    }
+
+    inline = [
+      "sudo apt update",
+      "sudo apt install ansible -y",
+    ]
+  }
 
 }
 
